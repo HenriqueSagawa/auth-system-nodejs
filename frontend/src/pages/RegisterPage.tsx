@@ -5,16 +5,23 @@ import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { Toast } from '../components/ui/Toast';
 import { useAuthStore } from '../store/authStore';
+import type { ErrorType } from '../store/authStore';
 import type { RegisterPayload } from '../types';
 
 interface RegisterForm extends RegisterPayload {
   confirmPassword: string;
 }
 
+interface ToastState {
+  message: string;
+  type: ErrorType | 'success';
+  duration?: number;
+}
+
 export function RegisterPage() {
   const navigate = useNavigate();
-  const { register: registerUser, isLoading, error, clearError, isAuthenticated } = useAuthStore();
-  const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const { register: registerUser, isLoading, error, errorType, clearError, isAuthenticated } = useAuthStore();
+  const [toast, setToast] = useState<ToastState | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const {
@@ -30,10 +37,19 @@ export function RegisterPage() {
 
   useEffect(() => {
     if (error) {
-      setToastMsg(error);
+      const durations: Record<string, number> = {
+        'warning': 8000,
+        'rate-limit': 10000,
+        'error': 4000,
+      };
+      setToast({
+        message: error,
+        type: errorType,
+        duration: durations[errorType] ?? 4000,
+      });
       clearError();
     }
-  }, [error, clearError]);
+  }, [error, errorType, clearError]);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const onSubmit = async ({ confirmPassword: _, ...data }: RegisterForm) => {
@@ -178,8 +194,8 @@ export function RegisterPage() {
         Protegido com JWT + Refresh Token
       </p>
 
-      {toastMsg && (
-        <Toast message={toastMsg} type="error" onClose={() => setToastMsg(null)} />
+      {toast && (
+        <Toast message={toast.message} type={toast.type} duration={toast.duration} onClose={() => setToast(null)} />
       )}
       {successMsg && (
         <Toast message={successMsg} type="success" onClose={() => setSuccessMsg(null)} duration={2500} />

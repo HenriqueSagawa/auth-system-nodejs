@@ -7,10 +7,18 @@ import { Toast } from '../components/ui/Toast';
 import { useAuthStore } from '../store/authStore';
 import type { LoginPayload } from '../types';
 
+type ToastType = 'error' | 'success' | 'info' | 'warning' | 'rate-limit';
+
+interface ToastState {
+  message: string;
+  type: ToastType;
+  duration?: number;
+}
+
 export function LoginPage() {
   const navigate = useNavigate();
-  const { login, isLoading, error, clearError, isAuthenticated } = useAuthStore();
-  const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const { login, isLoading, error, errorType, clearError, isAuthenticated } = useAuthStore();
+  const [toast, setToast] = useState<ToastState | null>(null);
 
   const {
     register,
@@ -24,11 +32,22 @@ export function LoginPage() {
 
   useEffect(() => {
     if (error) {
+      const durations: Record<string, number> = {
+        'warning': 8000,
+        'rate-limit': 10000,
+        'error': 4000,
+        'info': 4000,
+        'success': 3000,
+      };
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setToastMsg(error);
+      setToast({
+        message: error,
+        type: errorType,
+        duration: durations[errorType] ?? 4000,
+      });
       clearError();
     }
-  }, [error, clearError]);
+  }, [error, errorType, clearError]);
 
   const onSubmit = async (data: LoginPayload) => {
     try {
@@ -112,11 +131,12 @@ export function LoginPage() {
         Protegido com JWT + Refresh Token
       </p>
 
-      {toastMsg && (
+      {toast && (
         <Toast
-          message={toastMsg}
-          type="error"
-          onClose={() => setToastMsg(null)}
+          message={toast.message}
+          type={toast.type}
+          duration={toast.duration}
+          onClose={() => setToast(null)}
         />
       )}
     </div>
