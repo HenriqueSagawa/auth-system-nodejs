@@ -1,5 +1,5 @@
 import express from 'express';
-import helmet from 'helmet';
+import { default as helmet } from 'helmet';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes.js';
