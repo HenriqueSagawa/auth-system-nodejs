@@ -4,7 +4,7 @@ import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes.js';
 import { generalLimiter } from './middlewares/rateLimiter.js';
-import cors from 'cors';
+import cors from "cors";
 
 dotenv.config();
 

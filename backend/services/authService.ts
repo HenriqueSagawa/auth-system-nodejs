@@ -1,5 +1,5 @@
 import bcryptjs from "bcryptjs";
-import jwt from "jsonwebtoken";
+import jwt, { type SignOptions } from "jsonwebtoken";
 import { prisma } from "../config/database.js";
 import crypto from "crypto";
 
@@ -96,10 +96,12 @@ export class AuthService {
 
   generateAccessToken(userId: string, email: string): string {
     const payload: TokenPayload = { userId, email };
-    return jwt.sign(payload, process.env.JWT_ACCESS_SECRET!, {
-      expiresIn: process.env.JWT_ACCESS_EXPIRATION || '15m',
-      algorithm: 'HS256',
-    });
+    const signInOptions: SignOptions = {
+      expiresIn: (process.env.JWT_ACCESS_EXPIRATION as string || "15m") as any,
+      algorithm: "HS256",
+    };
+
+    return jwt.sign(payload, process.env.JWT_ACCESS_SECRET!, signInOptions);
   }
 
   async generateRefreshToken(userId: string): Promise<string> {
